@@ -1,10 +1,11 @@
 FROM debian:bullseye
 
-RUN apt update -y && apt upgrade -y
-RUN apt-get install -y curl php php7.4-fpm php-mysql php-curl php-gd php-mbstring php-xml php-zip default-mysql-client
+RUN apt-get update && apt-get upgrade -y
 
-COPY ./conf/script.sh /
+RUN apt-get install -y curl php php7.4-fpm php-mysql mariadb-client netcat
 
-RUN chmod +x /script.sh
+COPY ./tools/wp_conf.sh /
 
-ENTRYPOINT ["/script.sh"]
+RUN  chmod +x wp_conf.sh
+
+ENTRYPOINT ["./wp_conf.sh"]
