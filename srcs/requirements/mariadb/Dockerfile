@@ -1,11 +1,10 @@
-FROM debian:bullseye
+FROM debian:11
 
-RUN apt-get update && apt-get upgrade -y
+RUN apt-get update && apt-get install -y mariadb-server mariadb-client
 
-RUN apt-get install -y mariadb-server
+COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY ./tools/init.sh ./
 
-COPY ./tools/mdb-conf.sh /mdb-conf.sh
+RUN chmod +x ./init.sh
 
-RUN chmod +x /mdb-conf.sh
-
-ENTRYPOINT ["./mdb-conf.sh"]
+ENTRYPOINT ["sh", "/init.sh"]
