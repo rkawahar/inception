@@ -6,7 +6,7 @@ services:
     expose:
       - 3306
     env_file:
-      - .env
+      - ../.env
     volumes:
       - mariadb:/var/lib/mysql
     networks:
@@ -19,7 +19,7 @@ services:
     expose:
       - 9000
     env_file:
-      - .env
+      - ../.env
     volumes:
       - wordpress:/var/www/html
     depends_on:
@@ -34,7 +34,7 @@ services:
     ports:
       - "443:443"
     env_file:
-      - .env
+      - ../.env
     volumes:
       - wordpress:/var/www/html
     depends_on:
