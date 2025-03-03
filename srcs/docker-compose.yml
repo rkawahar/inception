@@ -47,13 +47,13 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /Users/kawaharadaryou/Documents/c/rkawahar/data/mariadb
+      device: /home/rkawahar/data/mariadb
       o: bind
   wordpress:
     driver: local
     driver_opts:
       type: none
-      device: /Users/kawaharadaryou/Documents/c/rkawahar/data/html
+      device: /home/rkawahar/data/html
       o: bind
 
 networks:
