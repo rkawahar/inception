@@ -25,7 +25,7 @@ This document describes how to set up the development environment, build and run
   - **DOMAIN_NAME**: Your domain, e.g. `yourlogin.42.fr`.
   - **HOST_DATA_PATH**: Host path for volume data, e.g. `/home/yourlogin/data`.
   - **MariaDB**: `MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`.
-  - **WordPress**: `WP_SUPERUSER`, `WP_SUPERUSER_PASSWORD`, `WP_SUPERUSER_EMAIL` (admin; username must not contain "admin" or "administrator"), and `WP_USER`, `WP_USER_PASSWORD`, `WP_USER_EMAIL` (second user).
+  - **WordPress**: `WP_SUPERUSER`, `WP_SUPERUSER_PASSWORD`, `WP_SUPERUSER_EMAIL` (admin; username must not contain "admin" or "administrator"), and `WP_USER`, `WP_USER_PASSWORD`, `WP_USER_EMAIL` (second user). Optional: `SITE_URL` (full URL including port, e.g. `https://login.42.fr:8443`) so that the WordPress init script updates `home` and `siteurl` on container start when using a custom port.
 
 - **Secrets**: Do not put credentials in Dockerfiles or in the repo. Use only `srcs/.env` (and optionally local files under a `secrets/` directory that is gitignored). Public credentials = project failure.
 
@@ -149,6 +149,12 @@ During the defense, the reviewer may ask you to change the port of a service (e.
    Example for port 8443: `https://rkawahar.42.fr:8443`
 
    **Option B — WordPress admin**: Log in to the site (using the URL **with** the port once), go to **Settings → General**, set **WordPress Address (URL)** and **Site Address (URL)** to `https://<login>.42.fr:<port>`, then save.
+
+   **Option C — SITE_URL in `.env`**: Add to `srcs/.env` (e.g. when using a custom port):
+   ```bash
+   SITE_URL=https://<login>.42.fr:8443
+   ```
+   The WordPress container’s `init.sh` runs `wp option update home` and `siteurl` from `SITE_URL` on every start. Then restart: `make down && make up`. No need to run `docker exec` manually.
 
    After this, redirects and links will keep the port and the site will stay accessible.
 

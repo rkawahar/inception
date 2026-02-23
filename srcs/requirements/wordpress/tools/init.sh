@@ -26,4 +26,11 @@ if [ ! -f "/var/www/html/wp-config.php" ]; then
         --allow-root
 fi
 
+# If SITE_URL is set (e.g. https://domain:8443 for a custom port), update WordPress URLs
+if [ -n "$SITE_URL" ]; then
+    cd /var/www/html
+    wp option update home "$SITE_URL" --allow-root 2>/dev/null || true
+    wp option update siteurl "$SITE_URL" --allow-root 2>/dev/null || true
+fi
+
 /usr/sbin/php-fpm8.2 -F
