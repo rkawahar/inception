@@ -1,24 +1,29 @@
-D_C=docker compose
-D_C_FILE = ./srcs/docker-compose.yml
+D_C		= docker compose
+D_C_FILE	= docker-compose.yml
+SRCS		= srcs
 
-all: build up
+all: prepare build up
 
-up: 
-	mkdir -p /home/rkawahar/data/html
-	mkdir -p /home/rkawahar/data/mariadb
-	sudo chmod -R 755 /home/rkawahar/data/html
-	sudo chmod -R 755  /home/rkawahar/data/mariadb
-	$(D_C) -f $(D_C_FILE) up
+prepare:
+	@if [ -f $(SRCS)/.env ]; then \
+		. $(SRCS)/.env 2>/dev/null; \
+		mkdir -p "$${HOST_DATA_PATH}/mariadb" "$${HOST_DATA_PATH}/wordpress"; \
+		chmod -R 755 "$${HOST_DATA_PATH}/mariadb" "$${HOST_DATA_PATH}/wordpress" 2>/dev/null || true; \
+	fi
+
+up: prepare
+	cd $(SRCS) && $(D_C) -f $(D_C_FILE) up -d
 
 build:
-	$(D_C) -f $(D_C_FILE) build --no-cache
+	cd $(SRCS) && $(D_C) -f $(D_C_FILE) build --no-cache
 
 down:
-	$(D_C) -f $(D_C_FILE) down
+	cd $(SRCS) && $(D_C) -f $(D_C_FILE) down
 
-clean:
-	sudo rm -rf  /home/rkawahar/data/mariadb
-	sudo rm -rf /home/rkawahar/data/html
-	docker rmi wordpress mariadb nginx
+clean: down
+	cd $(SRCS) && $(D_C) -f $(D_C_FILE) down -v
+	docker rmi nginx wordpress mariadb 2>/dev/null || true
 
-.PHONY: up build down clean
+re: clean build up
+
+.PHONY: all prepare up build down clean re
