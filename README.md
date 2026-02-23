@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by \<login\>.*
+*This project has been created as part of the 42 curriculum by rkawahar.*
 
 # Inception
 
@@ -12,7 +12,7 @@ The stack consists of:
 - **WordPress + php-fpm**: WordPress with PHP-FPM, no NGINX inside this container. Serves the application to NGINX over port 9000.
 - **MariaDB**: Database only, no NGINX. Listens on 3306 inside the Docker network.
 
-Two named volumes persist the WordPress database and website files; both store data on the host under `/home/<login>/data` as required. A custom bridge network connects the three containers.
+Two named volumes persist the WordPress database and website files; both store data on the host under `/home/rkawahar/data` as required. A custom bridge network connects the three containers.
 
 ## Instructions
 
@@ -94,4 +94,4 @@ Environment variables are required by the subject and are used via a `.env` file
 The project uses a user-defined bridge network (`inception`). Containers resolve each other by service name (e.g. `wordpress`, `mariadb`) and only NGINX exposes port 443 to the host. Using `network_mode: host` would remove network isolation and make services listen directly on the host; it is forbidden by the subject. The bridge network keeps isolation and predictable service discovery.
 
 **Docker Volumes vs Bind Mounts**  
-The subject requires *named* Docker volumes for the WordPress database and website files. Here, those named volumes are configured with `driver_opts` so that data is stored on the host under `/home/<login>/data` (mariadb and wordpress subdirs), as specified. So we use named volumes that bind to a fixed host path for persistence and compliance. Plain bind mounts (e.g. `volumes: - /path/on/host:/path/in/container`) are not used for these two volumes, in line with the requirement.
+The subject requires *named* Docker volumes for the WordPress database and website files. Here, those named volumes are configured with `driver_opts` so that data is stored on the host under `/home/rkawahar/data` (mariadb and wordpress subdirs), as specified. So we use named volumes that bind to a fixed host path for persistence and compliance. Plain bind mounts (e.g. `volumes: - /path/on/host:/path/in/container`) are not used for these two volumes, in line with the requirement.
