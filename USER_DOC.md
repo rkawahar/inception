@@ -62,6 +62,28 @@ You do not need to manage these containers directly; the Makefile and Docker Com
   - **WordPress second user**: `WP_USER`, `WP_USER_PASSWORD`, `WP_USER_EMAIL`.
   - **Database**: `MYSQL_ROOT_PASSWORD`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`.
 
+### How to log in to the database (MariaDB)
+
+The database runs inside the **mariadb** container. Credentials are in `srcs/.env` (`MYSQL_ROOT_PASSWORD`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`).
+
+**Option 1 — root user (from host):**
+```bash
+docker exec -it mariadb mysql -u root -p
+```
+When prompted, enter the value of `MYSQL_ROOT_PASSWORD` from `.env`.
+
+**Option 2 — WordPress user (from host):**
+```bash
+docker exec -it mariadb mysql -u <MYSQL_USER> -p <MYSQL_DATABASE>
+```
+Enter the value of `MYSQL_PASSWORD` when prompted. Replace `<MYSQL_USER>` and `<MYSQL_DATABASE>` with the values from `.env`.
+
+**Verify the database is not empty (after WordPress setup):**
+```bash
+docker exec -it mariadb mysql -u root -p -e "USE <MYSQL_DATABASE>; SHOW TABLES;"
+```
+You should see WordPress tables (e.g. `wp_posts`, `wp_users`). Replace `<MYSQL_DATABASE>` with the value from `.env`.
+
 - To change passwords or users: edit `srcs/.env`, then recreate the containers (and if needed re-run WordPress setup). For a full reset you can use `make re` (see DEV_DOC.md).
 
 - Keep `.env` only on your machine and never commit it. Credentials stored in the repo lead to project failure.

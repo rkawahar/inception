@@ -112,6 +112,54 @@ Docker Compose is always run from **`srcs/`** so that `docker-compose.yml` and `
   cd srcs && docker compose build --no-cache nginx && docker compose up -d nginx
   ```
 
+## Changing a service port (e.g. for evaluation)
+
+During the defense, the reviewer may ask you to change the port of a service (e.g. NGINX), then rebuild and restart so the service stays accessible.
+
+### Example: change NGINX (HTTPS) from 443 to 8443
+
+1. **Edit `srcs/docker-compose.yml`** — in the `nginx` service, change `ports`:
+   ```yaml
+   ports:
+     - "8443:443"   # host port 8443 → container port 443
+   ```
+   (The container still listens on 443 inside; only the host port changes.)
+
+2. **Rebuild and restart** (from project root):
+   ```bash
+   make down
+   make build
+   make up
+   ```
+   Or from `srcs/`: `docker compose down && docker compose build --no-cache && docker compose up -d`.
+
+3. **Access the site** with the new port:
+   ```
+   https://<login>.42.fr:8443
+   ```
+   The browser URL must include the port (e.g. `:8443`) because the default HTTPS port 443 is no longer used.
+
+4. **Important — WordPress redirect**: WordPress stores the site URL without a port (e.g. `https://login.42.fr`). When you use a non-default port (e.g. 8443), WordPress may **redirect** the browser to that URL, which drops the port and tries 443 → then the connection fails because nothing listens on 443. To fix this, update WordPress so it knows the correct URL **including the port**:
+
+   **Option A — WP-CLI from the host** (replace `<login>`, `<port>`, and `<MYSQL_*>` with your values):
+   ```bash
+   docker exec -it wordpress wp option update home 'https://<login>.42.fr:<port>' --allow-root
+   docker exec -it wordpress wp option update siteurl 'https://<login>.42.fr:<port>' --allow-root
+   ```
+   Example for port 8443: `https://rkawahar.42.fr:8443`
+
+   **Option B — WordPress admin**: Log in to the site (using the URL **with** the port once), go to **Settings → General**, set **WordPress Address (URL)** and **Site Address (URL)** to `https://<login>.42.fr:<port>`, then save.
+
+   After this, redirects and links will keep the port and the site will stay accessible.
+
+### If another service or port is requested
+
+- **NGINX**: Only `docker-compose.yml` → `nginx` → `ports` (e.g. `"<new_port>:443"`). No change in nginx.conf needed.
+- **MariaDB**: Add or change `ports` under `mariadb` (e.g. `"3307:3306"`). Connect with `mysql -h 127.0.0.1 -P 3307 -u ...`.
+- **WordPress (php-fpm)**: This service is not exposed to the host; only nginx talks to it. If the reviewer asks to change its *internal* port (9000), you would change `expose: - 9000` and the port in `nginx`’s `fastcgi_pass wordpress:9000` (and rebuild nginx).
+
+After any change: **rebuild** the affected image(s) if the Dockerfile or config changed, then **restart** (`make down` then `make up`, or `make re` for a full reset).
+
 ## Where project data is stored and how it is persisted
 
 - **WordPress database**: Stored in the **mariadb_data** volume. On the host, data is under **`$HOST_DATA_PATH/mariadb`** (e.g. `/home/yourlogin/data/mariadb`) because the volume is defined with `driver_opts` and `device: ${HOST_DATA_PATH}/mariadb`.
